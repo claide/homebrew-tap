@@ -2,7 +2,7 @@ class Pitstop < Formula
   desc "Menu bar AI quota tracker with a quota check for ticket workflows"
   homepage "https://github.com/claide/pitstop"
   url "https://github.com/claide/pitstop/archive/refs/tags/v0.2.0.tar.gz"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "52dd8c90516c495218f348881b948266df1245d4aa4ea8272849d80bbbe5cd24"
   license "MIT"
 
   depends_on macos: :sonoma
