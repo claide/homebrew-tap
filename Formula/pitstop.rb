@@ -15,6 +15,15 @@ class Pitstop < Formula
     (contents/"Helpers").install ".build/release/PitstopCLI" => "pitstop"
     contents.install "Resources/Info.plist"
 
+    # Swift's generated Bundle.module accessor looks for this bundle next to the
+    # executable (and, for an .app, at the bundle root too), so it has to ship as
+    # part of the app, not just sit in .build. Its name is always <package>_<target>.
+    bundle = Dir[".build/release/Pitstop_Pitstop.bundle"].first
+    if bundle
+      FileUtils.cp_r bundle, contents/"MacOS"
+      FileUtils.cp_r bundle, prefix
+    end
+
     # Ad-hoc signatures. Built locally, so Gatekeeper doesn't quarantine it.
     system "codesign", "--force", "--sign", "-", contents/"Helpers/pitstop"
     system "codesign", "--force", "--sign", "-", prefix/"Pitstop.app"
