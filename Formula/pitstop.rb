@@ -3,8 +3,8 @@ require "shellwords"
 class Pitstop < Formula
   desc "Menu bar AI quota tracker with a quota check for ticket workflows"
   homepage "https://github.com/claide/pitstop"
-  url "https://github.com/claide/pitstop/archive/refs/tags/v0.4.4.tar.gz"
-  sha256 "eff232819e4dafd1d64044d80d765f7649e7151b0d4f5ff4601059290debbcbd"
+  url "https://github.com/claide/pitstop/archive/refs/tags/v0.4.5.tar.gz"
+  sha256 "16dffdeb4c092d38f890dfb26db47e7127ccb474c939e4c6a68b6a0fc61b6dca"
   license "MIT"
 
   depends_on macos: :sonoma
