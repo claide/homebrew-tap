@@ -1,8 +1,10 @@
+require "shellwords"
+
 class Pitstop < Formula
   desc "Menu bar AI quota tracker with a quota check for ticket workflows"
   homepage "https://github.com/claide/pitstop"
-  url "https://github.com/claide/pitstop/archive/refs/tags/v0.4.4.tar.gz"
-  sha256 "eff232819e4dafd1d64044d80d765f7649e7151b0d4f5ff4601059290debbcbd"
+  url "https://github.com/claide/pitstop/archive/refs/tags/v0.4.2.tar.gz"
+  sha256 "ddd3a2c251754f6995ee798414948f450be099882ddb4ca08e5088dbb169058f"
   license "MIT"
 
   depends_on macos: :sonoma
@@ -15,17 +17,27 @@ class Pitstop < Formula
     (contents/"Helpers").install ".build/release/PitstopCLI" => "pitstop"
     contents.install "Resources/Info.plist"
 
-    # Swift's generated Bundle.module accessor looks for this bundle at the
-    # app's own root (sibling of Contents) — confirmed directly from its
-    # runtime error message. It must NOT go in Contents/MacOS or
-    # Contents/Resources: codesign rejects a plain resource bundle there,
-    # and Bundle.module doesn't look there anyway.
+    # Swift's generated Bundle.module accessor looks for this bundle inside
+    # Pitstop.app, at its own root (sibling of Contents) — confirmed directly
+    # from its runtime error message. It must NOT go in Contents/MacOS or
+    # Contents/Resources: codesign rejects a plain resource bundle there, and
+    # Bundle.module doesn't look there anyway. Note: `prefix` is this keg's
+    # own root, not Pitstop.app — the bundle has to go inside the .app itself.
     bundle = Dir[".build/release/Pitstop_Pitstop.bundle"].first
     FileUtils.cp_r bundle, prefix/"Pitstop.app" if bundle
 
     # Ad-hoc signatures. Built locally, so Gatekeeper doesn't quarantine it.
     system "codesign", "--force", "--sign", "-", contents/"Helpers/pitstop"
-    system "codesign", "--force", "--sign", "-", prefix/"Pitstop.app"
+
+    # codesign warns "unsealed contents present in the bundle root" because
+    # the resource bundle sits outside Contents/ on purpose (see above) —
+    # expected and harmless, but it exits non-zero on this codesign version,
+    # which `system` would treat as a hard failure. Only actually fail on a
+    # different error.
+    codesign_output = %x(codesign --force --sign - #{(prefix/"Pitstop.app").to_s.shellescape} 2>&1)
+    unless $?.success? || codesign_output.include?("unsealed contents present in the bundle root")
+      odie "codesign failed:\n#{codesign_output}"
+    end
 
     bin.install_symlink contents/"Helpers/pitstop"
   end
