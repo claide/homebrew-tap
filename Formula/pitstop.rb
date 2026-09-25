@@ -21,7 +21,7 @@ class Pitstop < Formula
     # Contents/Resources: codesign rejects a plain resource bundle there,
     # and Bundle.module doesn't look there anyway.
     bundle = Dir[".build/release/Pitstop_Pitstop.bundle"].first
-    FileUtils.cp_r bundle, prefix if bundle
+    FileUtils.cp_r bundle, prefix/"Pitstop.app" if bundle
 
     # Ad-hoc signatures. Built locally, so Gatekeeper doesn't quarantine it.
     system "codesign", "--force", "--sign", "-", contents/"Helpers/pitstop"
