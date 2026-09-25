@@ -15,11 +15,13 @@ class Pitstop < Formula
     (contents/"Helpers").install ".build/release/PitstopCLI" => "pitstop"
     contents.install "Resources/Info.plist"
 
-    # Swift's generated Bundle.module accessor looks for this bundle in the
-    # app's Resources folder, the standard macOS location for resource
-    # bundles (matches what scripts/bundle.sh does for local dev builds).
+    # Swift's generated Bundle.module accessor looks for this bundle at the
+    # app's own root (sibling of Contents) — confirmed directly from its
+    # runtime error message. It must NOT go in Contents/MacOS or
+    # Contents/Resources: codesign rejects a plain resource bundle there,
+    # and Bundle.module doesn't look there anyway.
     bundle = Dir[".build/release/Pitstop_Pitstop.bundle"].first
-    (contents/"Resources").install bundle if bundle
+    FileUtils.cp_r bundle, prefix if bundle
 
     # Ad-hoc signatures. Built locally, so Gatekeeper doesn't quarantine it.
     system "codesign", "--force", "--sign", "-", contents/"Helpers/pitstop"
